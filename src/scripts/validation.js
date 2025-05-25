@@ -55,6 +55,15 @@ const checkInputValidity = (
     inputElement.setCustomValidity("");
   }
 
+  //  Дополнительная проверка, если поле — это URL
+  if (inputElement.type === "url" && inputElement.value.trim() !== "") {
+    try {
+      new URL(inputElement.value);
+    } catch (_) {
+      inputElement.setCustomValidity("Введите корректный адрес сайта.");
+    }
+  }
+
   if (!inputElement.validity.valid) {
     showInputError(
       formElement,
