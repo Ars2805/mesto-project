@@ -43,7 +43,16 @@ const hideInputError = (
   errorElement.classList.remove(errorClass);
 };
 
-const checkInputValidity = (
+const validateImageURL = (url) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+};
+
+const checkInputValidity = async (
   formElement,
   inputElement,
   inputErrorClass,
@@ -55,10 +64,16 @@ const checkInputValidity = (
     inputElement.setCustomValidity("");
   }
 
-  //  Дополнительная проверка, если поле — это URL
+  // Дополнительная проверка, если поле — это URL
   if (inputElement.type === "url" && inputElement.value.trim() !== "") {
     try {
       new URL(inputElement.value);
+      const isValidImage = await validateImageURL(inputElement.value);
+      if (!isValidImage) {
+        inputElement.setCustomValidity("Ссылка недоступна или не является изображением.");
+      } else {
+        inputElement.setCustomValidity("");
+      }
     } catch (_) {
       inputElement.setCustomValidity("Введите корректный адрес сайта.");
     }
@@ -89,8 +104,8 @@ const setEventListeners = (
   const buttonElement = formElement.querySelector(submitButtonSelector);
   toggleButtonState(inputList, buttonElement, inactiveButtonClass);
   inputList.forEach((inputElement) => {
-    inputElement.addEventListener("input", () => {
-      checkInputValidity(
+    inputElement.addEventListener("input", async () => {
+      await checkInputValidity(
         formElement,
         inputElement,
         inputErrorClass,
